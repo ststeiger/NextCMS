@@ -48,7 +48,8 @@ namespace NextCMS
                 o.Conventions.ConfigureFilter(new IgnoreAntiforgeryTokenAttribute());
             })
             */
-            .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            //.SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
+            ;
 
             services.Configure<Microsoft.AspNetCore.Mvc.Razor.RazorViewEngineOptions>(options =>
             {

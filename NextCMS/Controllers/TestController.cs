@@ -29,13 +29,23 @@ namespace NextCMS.Controllers
         [Route("test")]
         public async Task<IActionResult> Index()
         {
-            // string viewModel = null;
-            var viewModel = new NextCMS.Views.Pages.MyTestPageModel();
+            string result = null;
+            // var viewModel = new NextCMS.Views.Pages.MyTestPageModel();
+            // result = await this.m_viewRenderService.RenderToStringAsync("Pages/MyTestPage", viewModel); // viewModel has to be of specified type
 
-            var result = await this.m_viewRenderService.RenderToStringAsync("Pages/MyTestPage", viewModel); // viewModel has to be of specified type
-            result = await this.m_viewRenderService.RenderToStringAsync("Pages/MyTestView", viewModel); // viewModel can be anything, if not defined
+            // result = await this.m_viewRenderService.RenderToStringAsync("Pages/MyTestView", viewModel); // viewModel can be anything, if not defined
 
-            result = await this.m_viewRenderService.RenderToStringAsync("DbFiles/MerraMioso", viewModel); // viewModel can be anything, if not defined
+
+            // var viewModel = new NextCMS.DbFiles.MerraMiosoModel();
+            // result = await this.m_viewRenderService.RenderToStringAsync("DbFiles/MerraMioso", viewModel); // viewModel can be anything, if not defined
+
+
+            // var viewModel = new NextCMS.DbFiles.MerraCursosoModel();
+            // result = await this.m_viewRenderService.RenderToStringAsync("DbFiles/MerraCursoso", viewModel); // viewModel can be anything, if not defined
+            // result = await this.m_viewRenderService.RenderToStringAsync("BlubbBlubb", viewModel); // viewModel can be anything, if not defined
+
+            var viewModel = new NextCMS.DbFiles.MerryChristmasModel();
+            result = await this.m_viewRenderService.RenderToStringAsync("BlubbBlubb", viewModel); // viewModel can be anything, if not defined
 
             return Content(result);
         }
