@@ -1,20 +1,21 @@
 ﻿
 namespace NextCMS.DbFileSystem
 {
-
-
+    
+    
     public interface IDbFileSystemEntry
     { }
-
+    
     
     public class DbFileProperties
     {
         public System.DateTimeOffset? LastModified { get; set; }
-
+        
         public int Length { get; set; }
 
     }
-
+    
+    
     public class DbFileReference
         : IDbFileSystemEntry
     {
@@ -80,13 +81,14 @@ namespace NextCMS.DbFileSystem
                 // await tw.WriteAsync(text);
                 // await tw.FlushAsync();
             }
-
+            
             // throw new System.NotImplementedException("DbFileReference.DownloadToStream");
         }
-
-
-    }
-
+        
+        
+    } // End Class DbFileReference
+    
+    
     public class DirectoryReference
         : IDbFileSystemEntry
     {
@@ -94,37 +96,34 @@ namespace NextCMS.DbFileSystem
         {
             return new DbDirectoryContentListing();
         }
-    }
-
-
+        
+    } // End Class DirectoryReference 
+    
+    
     public class DbDirectoryContentListing
     {
         public System.Collections.Generic.List<IDbFileSystemEntry> Results;
-
-
-
+        
+        
         public bool HasResults
         {
             get
             {
                 if (this.Results == null)
                     return false;
-
-
+                
                 using (System.Collections.Generic.IEnumerator<IDbFileSystemEntry> e = this.Results.GetEnumerator())
                 {
-                    if (e.MoveNext()) return true;
+                    if (e.MoveNext()) 
+                        return true;
                 }
-
+                
                 return false;
             }
-        }
-
-
-
-    }
-
-
-
-
+        } // End Property HasResults 
+        
+        
+    } // End Class DbDirectoryContentListing 
+    
+    
 }
