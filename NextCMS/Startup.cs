@@ -76,7 +76,9 @@ namespace NextCMS
                 );
 
             });
+            
 
+            services.AddSingleton<Microsoft.AspNetCore.Http.IHttpContextAccessor, HttpContextAccessor>();
 
             services.AddScoped<Services.IViewRenderService, Services.ViewRenderService>();
 
