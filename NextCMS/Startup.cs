@@ -16,7 +16,10 @@ namespace NextCMS
 {
 
     public class Startup
+        : IStartup
     {
+        public IConfiguration Configuration { get; }
+        private IApplicationBuilder m_Application;
 
 
         public Startup(IConfiguration configuration)
@@ -25,11 +28,23 @@ namespace NextCMS
         }
 
 
-        public IConfiguration Configuration { get; }
+        void IStartup.Configure(IApplicationBuilder app)
+        {
+            this.m_Application = app;
 
+            Microsoft.Extensions.Logging.ILoggerFactory loggerFactory = app.ApplicationServices.
+                GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>();
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+            Microsoft.AspNetCore.Hosting.IHostingEnvironment env = app.ApplicationServices.
+                GetRequiredService<Microsoft.AspNetCore.Hosting.IHostingEnvironment>();
+
+            Microsoft.AspNetCore.Http.IHttpContextAccessor httpContext = app.ApplicationServices.
+                GetRequiredService<Microsoft.AspNetCore.Http.IHttpContextAccessor>();
+
+            this.Configure(app, env);
+        }
+
+        IServiceProvider IStartup.ConfigureServices(IServiceCollection services)
         {
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -64,10 +79,11 @@ namespace NextCMS
 
 
             services.AddScoped<Services.IViewRenderService, Services.ViewRenderService>();
+
+            return services.BuildServiceProvider();
         }
 
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
@@ -90,4 +106,6 @@ namespace NextCMS
 
 
     }
+
+
 }
