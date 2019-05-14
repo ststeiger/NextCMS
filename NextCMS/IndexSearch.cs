@@ -1,13 +1,161 @@
 
 namespace NextCMS
 {
-    public static class Crap
+
+
+    public class IndexSearch
     {
-        public static System.IO.DriveInfo GetDriveInfo(this System.IO.FileInfo file)
+
+        // var ids = new NextCMS.IndexSearch();
+        // ids.Test();
+        // Change SQL connection string in SQL-class at bottom 
+        public void Test()
         {
-            return new System.IO.DriveInfo(file.Directory.Root.FullName);
-        }
-    }
+            string sql = @"
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[FileIndex]') AND type in (N'U'))
+DROP TABLE [dbo].[FileIndex]
+GO
+
+
+
+CREATE TABLE dbo.FileIndex
+(
+     uid uniqueidentifier NOT NULL 
+    ,root nvarchar(4000) NOT NULL 
+    ,path nvarchar(4000) NOT NULL 
+    ,directory nvarchar(4000) 
+    ,fileName nvarchar(4000) 
+    ,fileNameWithoutExtension nvarchar(4000) 
+    ,extension nvarchar(100) 
+    ,creationTime datetime
+    ,accessTime datetime
+    ,writeTime datetime
+    ,size bigint 
+);
+
+
+GO 
+
+SELECT 
+	 COUNT(*) AS cnt 
+	,extension 
+FROM FileIndex 
+WHERE (1=1) 
+AND fileName NOT LIKE '%designer.vb' 
+AND fileNameWithoutExtension NOT LIKE '%.FileListAbsolute'
+AND fileNameWithoutExtension NOT IN ('DO_NOT_ADD_FILES_HERE', '_WPPLastBuildInfo')
+AND fileName NOT IN ('AssemblyInfo.cs')
+AND extension NOT IN 
+( 
+	  '.dll','.pdb', '.map', '.wsdl', '.disco', '.xml' 
+	, '.vssscc', '.vspscc', '.ide', '.ide-shm', '.ide-wal', '.CopyComplete' 
+	, '.sln', '.suo', '.user', '.vbproj', '.csproj', '.tfignore', '.pubxml', '.lock', '.cache'
+	, '.myapp', '.datasource' ,'.force' 
+	, '.set', '.settings', '.cd', '.htc' 
+	,'.resx', '.resources' 
+
+	,'.png', '.gif', '.jpg'
+	, '.docx', '.pdf' 
+	-- , '.sql'
+) 
+
+GROUP BY extension 
+
+ORDER BY cnt DESC 
+
+
+GO
+
+
+SELECT 
+     fileName
+    ,fileNameWithoutExtension
+    ,extension
+FROM FileIndex 
+WHERE extension LIKE '.master' 
+
+";
+
+            IndexDirectory(@"D:\username\Documents\Visual Studio 2017\TFS\COR-Basic\COR-Basic\Basicv3");
+            System.Console.WriteLine("indexed");
+        } // End Sub Test 
+
+
+        public void IndexDirectory(string rootPath)
+        {
+            SQL sql = new SQL();
+
+
+            System.IO.DirectoryInfo di = new System.IO.DirectoryInfo(rootPath);
+            System.IO.FileInfo[] fis = di.GetFiles("*.*", System.IO.SearchOption.AllDirectories);
+            
+            for (int i = 0; i < fis.Length; ++i)
+            {
+                try
+                {
+                    // bool rdo = fis[i].IsReadOnly;
+                    // System.IO.DriveInfo drive = fis[i].GetDriveInfo();
+                    string root = fis[i].Directory.Root.FullName;
+                    string fileName = System.IO.Path.GetFileNameWithoutExtension(fis[i].Name);
+
+
+                    using (System.Data.Common.DbCommand cmd = sql.CreateCommand(@"
+INSERT INTO FileIndex
+(
+	 uid
+	,root 
+    ,path
+	,directory
+	,fileName
+	,fileNameWithoutExtension
+	,extension
+	,creationTime
+	,accessTime
+	,writeTime
+	,size
+) 
+SELECT
+     NEWID() AS uid 
+    ,@root 
+    ,@path
+    ,@dir
+    ,@fn
+    ,@fileNameWithoutExtension
+    ,@ext
+    ,@creationTime
+    ,@accessTime
+    ,@writeTime
+    ,@size
+;
+"))
+                    {
+                        sql.AddParameter(cmd, "root", root);
+                        sql.AddParameter(cmd, "path", fis[i].FullName);
+                        sql.AddParameter(cmd, "dir", fis[i].DirectoryName);
+                        sql.AddParameter(cmd, "fn", fis[i].Name);
+                        sql.AddParameter(cmd, "fileNameWithoutExtension", fileName);
+                        sql.AddParameter(cmd, "ext", fis[i].Extension);
+                        sql.AddParameter(cmd, "creationTime", fis[i].CreationTimeUtc);
+                        sql.AddParameter(cmd, "accessTime", fis[i].LastAccessTimeUtc);
+                        sql.AddParameter(cmd, "writeTime", fis[i].LastWriteTimeUtc);
+                        sql.AddParameter(cmd, "size", fis[i].Length);
+
+                        sql.ExecuteNonQuery(cmd);
+                    } // End Using cmd 
+
+                }
+                catch (System.Exception e)
+                {
+                    System.Console.WriteLine(e);
+                }
+
+            } // Next i 
+
+        } // End Sub IndexDirectory 
+
+
+    } // End Class IndexSearch 
+
 
 
     public class SQL
@@ -25,11 +173,11 @@ namespace NextCMS
         {
             System.Data.SqlClient.SqlConnectionStringBuilder csb = new System.Data.SqlClient.SqlConnectionStringBuilder();
             csb.DataSource = System.Environment.MachineName;
-            
-            if("COR".Equals(System.Environment.UserDomainName, System.StringComparison.InvariantCultureIgnoreCase))
+
+            if ("COR".Equals(System.Environment.UserDomainName, System.StringComparison.InvariantCultureIgnoreCase))
                 csb.DataSource += @"\SQLExpress";
 
-                
+
             csb.InitialCatalog = "TestDb";
             csb.IntegratedSecurity = true;
             if (!csb.IntegratedSecurity)
@@ -203,8 +351,8 @@ namespace NextCMS
                                     idbtTrans.Rollback();
 
                                 iAffected = -2;
-                                
-                                    throw;
+
+                                throw;
                             } // End catch
                             finally
                             {
@@ -226,155 +374,13 @@ namespace NextCMS
     } // End Class SQL 
 
 
-    // var ids = new NextCMS.IndexSearch();
-    // ids.Test();
-    public class IndexSearch
+    public static class FileInfoExtensions
     {
-
-
-        public void Test()
+        public static System.IO.DriveInfo GetDriveInfo(this System.IO.FileInfo file)
         {
-            string sql = @"
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[FileIndex]') AND type in (N'U'))
-DROP TABLE [dbo].[FileIndex]
-GO
-
-
-
-CREATE TABLE dbo.FileIndex
-(
-     uid uniqueidentifier NOT NULL 
-    ,root nvarchar(4000) NOT NULL 
-    ,path nvarchar(4000) NOT NULL 
-    ,directory nvarchar(4000) 
-    ,fileName nvarchar(4000) 
-    ,fileNameWithoutExtension nvarchar(4000) 
-    ,extension nvarchar(100) 
-    ,creationTime datetime
-    ,accessTime datetime
-    ,writeTime datetime
-    ,size bigint 
-);
-
-
-SELECT 
-	 COUNT(*) AS cnt 
-	,extension 
-FROM FileIndex 
-WHERE (1=1) 
-AND fileName NOT LIKE '%designer.vb' 
-AND fileNameWithoutExtension NOT LIKE '%.FileListAbsolute'
-AND fileNameWithoutExtension NOT IN ('DO_NOT_ADD_FILES_HERE', '_WPPLastBuildInfo')
-AND fileName NOT IN ('AssemblyInfo.cs')
-AND extension NOT IN 
-( 
-	  '.dll','.pdb', '.map', '.wsdl', '.disco', '.xml' 
-	, '.vssscc', '.vspscc', '.ide', '.ide-shm', '.ide-wal', '.CopyComplete' 
-	, '.sln', '.suo', '.user', '.vbproj', '.csproj', '.tfignore', '.pubxml', '.lock', '.cache'
-	, '.myapp', '.datasource' ,'.force' 
-	, '.set', '.settings', '.cd', '.htc' 
-	,'.resx', '.resources' 
-
-	,'.png', '.gif', '.jpg'
-	, '.docx', '.pdf' 
-	-- , '.sql'
-) 
-
-GROUP BY extension 
-
-ORDER BY cnt DESC 
-
-
-
-
-SELECT 
-     fileName
-    ,fileNameWithoutExtension
-    ,extension
-FROM FileIndex 
-WHERE extension LIKE '.master' 
-
-
-
-";
-
-            IndexDirectory(@"D:\username\Documents\Visual Studio 2017\TFS\COR-Basic\COR-Basic\Basicv3");
-            System.Console.WriteLine("indexed");
+            return new System.IO.DriveInfo(file.Directory.Root.FullName);
         }
-        
-        
-        public void IndexDirectory(string rootPath)
-        {
-            SQL sql = new SQL();
+    } // End Class FileInfoExtensions
 
 
-            System.IO.DirectoryInfo di = new System.IO.DirectoryInfo(rootPath);
-            System.IO.FileInfo[] fis = di.GetFiles("*.*", System.IO.SearchOption.AllDirectories);
-            
-            for (int i = 0; i < fis.Length; ++i)
-            {
-                try
-                {
-                    // bool rdo = fis[i].IsReadOnly;
-                    // System.IO.DriveInfo drive = fis[i].GetDriveInfo();
-                    string root = fis[i].Directory.Root.FullName;
-                    string fileName = System.IO.Path.GetFileNameWithoutExtension(fis[i].Name);
-
-
-                    using (System.Data.Common.DbCommand cmd = sql.CreateCommand(@"
-INSERT INTO FileIndex
-(
-	 uid
-	,root 
-    ,path
-	,directory
-	,fileName
-	,fileNameWithoutExtension
-	,extension
-	,creationTime
-	,accessTime
-	,writeTime
-	,size
-) 
-SELECT
-     NEWID() AS uid 
-    ,@root 
-    ,@path
-    ,@dir
-    ,@fn
-    ,@fileNameWithoutExtension
-    ,@ext
-    ,@creationTime
-    ,@accessTime
-    ,@writeTime
-    ,@size
-;
-"))
-                    {
-                        sql.AddParameter(cmd, "root", root);
-                        sql.AddParameter(cmd, "path", fis[i].FullName);
-                        sql.AddParameter(cmd, "dir", fis[i].DirectoryName);
-                        sql.AddParameter(cmd, "fn", fis[i].Name);
-                        sql.AddParameter(cmd, "fileNameWithoutExtension", fileName);
-                        sql.AddParameter(cmd, "ext", fis[i].Extension);
-                        sql.AddParameter(cmd, "creationTime", fis[i].CreationTimeUtc);
-                        sql.AddParameter(cmd, "accessTime", fis[i].LastAccessTimeUtc);
-                        sql.AddParameter(cmd, "writeTime", fis[i].LastWriteTimeUtc);
-                        sql.AddParameter(cmd, "size", fis[i].Length);
-
-                        sql.ExecuteNonQuery(cmd);
-                    }
-
-                        
-                }
-                catch (System.Exception e)
-                {
-                    System.Console.WriteLine(e);
-                }
-            }
-            
-        }
-
-
-    }
 }
