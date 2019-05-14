@@ -60,7 +60,7 @@ namespace NextCMS.DbFileSystem
 
         public IDbFileSystemEntry GetFileReference(string path)
         {
-            return new DbFileReference();
+            return new DbFileReference(path);
         }
 
 

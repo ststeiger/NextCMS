@@ -22,14 +22,27 @@ namespace NextCMS.DbFileSystem
             this.m_ignoreFiles = new System.Collections.Generic.HashSet<string>(System.StringComparer.InvariantCultureIgnoreCase);
 
             this.m_ignoreFolders.Add("/Areas");
+            this.m_ignoreFolders.Add("/Views");
             this.m_ignoreFolders.Add("/Pages");
             this.m_ignoreFolders.Add("/Pages/Shared");
 
-            this.m_ignoreFiles.Add("/Areas/_ViewImports.cshtml");
+
+            this.m_ignoreFiles.Add("/_Layout.cshtml");
             this.m_ignoreFiles.Add("/_ViewImports.cshtml");
             this.m_ignoreFiles.Add("/_ViewStart.cshtml");
-            
+
+            this.m_ignoreFiles.Add("/Areas/_Layout.cshtml");
+            this.m_ignoreFiles.Add("/Areas/_ViewImports.cshtml");
+            this.m_ignoreFiles.Add("/Areas/_ViewStart.cshtml");
+
+            this.m_ignoreFiles.Add("/Views/_Layout.cshtml");
+            this.m_ignoreFiles.Add("/Views/_ViewImports.cshtml");
+            this.m_ignoreFiles.Add("/Views/_ViewStart.cshtml");
+
             this.m_ignoreFiles.Add("/Pages/_Layout.cshtml");
+            this.m_ignoreFiles.Add("/Pages/_ViewImports.cshtml");
+            this.m_ignoreFiles.Add("/Pages/_ViewStart.cshtml");
+            
             this.m_ignoreFiles.Add("/Pages/_CookieConsentPartial.cshtml");
 
 
