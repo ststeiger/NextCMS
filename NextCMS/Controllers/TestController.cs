@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-
+﻿
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace NextCMS.Controllers 
 {
-    public class TestController : Controller
+
+
+    public class TestController 
+        : Microsoft.AspNetCore.Mvc.Controller
     {
 
         private readonly Services.IViewRenderService m_viewRenderService;
@@ -20,14 +18,11 @@ namespace NextCMS.Controllers
         }
 
 
-
-
-
         // https://ppolyzos.com/2016/09/09/asp-net-core-render-view-to-string/
         // https://stackoverflow.com/questions/40912375/return-view-as-string-in-net-core
 
-        [Route("test")]
-        public async Task<IActionResult> Index()
+        [Microsoft.AspNetCore.Mvc.Route("test")]
+        public async System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.IActionResult> Index()
         {
             // string viewModel = null;
             var viewModel = new NextCMS.Views.Pages.MyTestPageModel();
