@@ -223,7 +223,7 @@ namespace NextCMS
             return iAffected;
         } // End Function ExecuteNonQuery
 
-    }
+    } // End Class SQL 
 
 
     // var ids = new NextCMS.IndexSearch();
