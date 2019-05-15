@@ -371,15 +371,67 @@ SELECT
             return iAffected;
         } // End Function ExecuteNonQuery
 
+
+        public void foo()
+        {
+            string[] tags = new string[] { "ruby", "rails", "scruffy", "rubyonrails" };
+
+            System.Data.SqlClient.SqlCommand cmd = new System.Data.SqlClient.SqlCommand("SELECT Tags.* FROM Tags JOIN @tagNames as P ON Tags.Name = P.Name");
+            
+            // value must be IEnumerable<SqlDataRecord>
+            cmd.Parameters.AddWithValue("@tagNames", tags.AsSqlDataRecord("Name")).SqlDbType = System.Data.SqlDbType.Structured;
+            cmd.Parameters["@tagNames"].TypeName = "dbo.TagNamesTableType";
+        }
+
+
     } // End Class SQL 
+
+
+    public static class SqlExtensions
+    {
+
+        // Extension method for converting IEnumerable<T> to IEnumerable<SqlDataRecord>
+        public static System.Collections.Generic.IEnumerable<Microsoft.SqlServer.Server.SqlDataRecord>
+            AsSqlDataRecord<T>(this System.Collections.Generic.IEnumerable<T> values
+            , string columnName)
+        {
+            System.Collections.Generic.List<Microsoft.SqlServer.Server.SqlDataRecord> recs =
+                new System.Collections.Generic.List<Microsoft.SqlServer.Server.SqlDataRecord>();
+
+            bool isFirst = true;
+            Microsoft.SqlServer.Server.SqlMetaData metadata = null;
+
+            foreach (T thisValue in values)
+            {
+                if (isFirst)
+                    metadata = Microsoft.SqlServer.Server.SqlMetaData.InferFromValue(thisValue, columnName);
+
+                Microsoft.SqlServer.Server.SqlDataRecord r = new Microsoft.SqlServer.Server.SqlDataRecord(metadata);
+                r.SetValues(thisValue);
+                recs.Add(r);
+
+                isFirst = false;
+            } // Next thisValue 
+
+            // Annoying, but SqlClient wants null instead of 0 rows
+            if (recs.Count == 0)
+                recs = null; 
+
+            return recs;
+        } // End Function AsSqlDataRecord 
+
+
+    } // End Class SqlExtensions 
 
 
     public static class FileInfoExtensions
     {
+
         public static System.IO.DriveInfo GetDriveInfo(this System.IO.FileInfo file)
         {
             return new System.IO.DriveInfo(file.Directory.Root.FullName);
         }
+
     } // End Class FileInfoExtensions
 
 
